@@ -1,0 +1,242 @@
+---
+title: "PSY6422 Project"
+author: "Naomi Sollis"
+date: "2025-11-20"
+output: 
+  html_document: 
+    theme: cosmo
+    toc: true
+    toc_float: true
+css: styles.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Global Mortality Comparison of Alzheimer's Disease and Other Dementias
+```{r, echo=FALSE, out.width="48%",fig.align="center"}
+knitr::include_graphics("~/My_project/Assessment/PSY6422_Assignment/Alzheimer-s/R_Markdowns/image.jpg")
+
+```
+<div style="text-align: center;">
+  (Alzheimer’s Association, 2019)
+</div>
+
+
+# Data Origins
+
+This project focuses on the global mortality rate of Alzheimer’s disease, alongside other forms of dementia. The raw dataset was accessed via Our World in Data (World Health Organization, 2025), derived from the original World Health Organisation’s (WHO) Global Health Estimates (GHE) of 2023 (World Health Organization, 2023).  
+
+WHO’s GHE examines global death and disability statistics, by region, country, sex, age and cause, per 100,000 people. This dataset focuses on the trends of the mortality rate of Alzheimer’s disease from **2000 to 2021**, produced from national vital registration data, latest estimates from WHO technical programs, United Nations partners and inter-agency groups, and the Global Burden of Disease.  
+
+**References for the raw dataset:**
+
+World Health Organization. (2023). Global Health Estimates. Www.who.int. https://www.who.int/data/global-health-estimates  
+
+World Health Organization . (2025). Death rate from Alzheimer’s. Our World in Data. 
+
+https://archive.ourworldindata.org/20250909093708/grapher/deathratefromalzheimersotherdementias-ghe.html?tab=table  
+
+---
+# The Beginning of the Project
+First you need to load the following packages into the console, I had to use all of these due to operating off of a Linux computer. For Windows or MacOS you probably won't need all of these packages, just tidyverse, here, ggplot2 and possibly plotly.
+```{r setup-packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+library(ggplot2)
+library(readr)
+library(scatterplot3d)
+library(plotly)
+library(dplyr)
+library(viridis)
+```
+Next you need to import the raw data set into R and give it a more convenient name.
+```{r import-data, message=FALSE}
+death_rate <- read_csv("Raw_Data/death_rate.csv", show_col_types = FALSE)
+
+```
+
+This is a summary of the raw dataset, and a list of the column names, as well as the first few rows of the data.
+```{r}
+summary(death_rate)
+
+```
+```{r}
+names(death_rate)
+
+```
+## Data Dictionary
+
+- **Entity** — Country or global estimate  
+- **Year** — Calendar year (2000–2021)  
+- **Mortality_rate** — Deaths per 100,000 people from Alzheimer's disease and other dementias  
+
+
+```{r}
+head(death_rate, 10)
+```
+# The Research Question
+How does Alzheimer's disease mortality rate in the world's three most populated countries (India, China, United States of America) compare across the 2000–2021 period? 
+
+# Data Preparation
+For this project, I decided to only analyse the responses from the three most populated countries in the world. To reflect this in the clean data, I removed most of the countries as variables and only focused on India, China and the US. The original dataset consisted of 4422 obs.
+
+```{r}
+# Define the countries and the global entity you want to keep, you can just do the 3 countries here but I added Global just in case it would expand on the visualisations- it did not do much so next time I probably wouldn't include it.
+target_countries <- c("India", "China", "United States", "Global")
+```
+```{r}
+# Rename the long column name (I renamed mine Mortality_rate)
+death_rate <- death_rate %>%
+  rename(Mortality_rate = `Death rate from alzheimer disease and other dementias among both sexes`)
+
+```
+```{r}
+# Look at the new names
+names(death_rate)
+```
+```{r}
+#Filter the death_rate dataset to include only the target countries and the years 2000 to 2021
+# This assumes your 'Country' column holds the name of the entity and your 'Year' column holds the year. Adjust names if needed based on names(death_rate).
+filtered_data <- death_rate %>%
+  filter(Entity %in% target_countries) %>%
+  filter(Year >= 2000 & Year <= 2021)
+```
+```{r}
+filtered_data <- na.omit(filtered_data) 
+
+```
+```{r}
+# Look at the final clean structure
+head(filtered_data)
+summary(filtered_data)
+```
+Your new, clean dataset should consist of 66 obs.
+
+# Visualisations
+## Figure 1: A Line Graph to demonstrate the trend in Alzheimer's Mortality Rate from 2000-2021
+```{r}
+ggplot(filtered_data, aes(x = Year, y = Mortality_rate, colour = Entity)) +
+  geom_line(linewidth = 2) +  # Thicker lines
+  theme_minimal() +
+  labs(
+    title = "Alzheimer’s Mortality Rate (2000–2021)",
+    x = "Year",
+    y = "Deaths per 100,000",
+    colour = "Country"
+  ) +
+  scale_colour_manual(values = c(
+    "India" = "lightpink",
+    "China" = "purple",
+    "United States" = "lightblue"
+  )) +
+  theme(
+    text = element_text(size = 14)  # makes labels easier to read
+  )
+```
+
+
+This line graph demonstrates the mortality rate for Alzheimer’s disease, per 100,000 people between the years 2000 and 2021. It is quite simple to comprehend, the higher up the line, the higher the mortality rate. From first glance, the US has a much higher Alzheimer’s-based mortality rate compared to China and India. The choice of using this graph initially is that it is simple, yet effective. 
+
+## Figure 2: A line graph to demonstrate trends over time per country
+
+```{r}
+library(plotly)
+
+# Interactive line plot with custom colors
+plot_ly(filtered_data, 
+        x = ~Year, 
+        y = ~Mortality_rate, 
+        color = ~Entity, 
+        colors = c("India" = "lightpink",
+                   "China" = "purple",
+                   "United States" = "lightblue"),
+        type = 'scatter', 
+        mode = 'lines+markers') %>%
+  layout(
+    title = "Alzheimer’s Mortality Rate (2000–2021)",
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Deaths per 100,000"),
+    legend = list(title = list(text='Country'))
+  )
+
+```
+
+
+I chose to expand on the original line graph and add some more detailing to it. I was really excited to try making an interactive visualisation, and I think that the interactive line graph in Figure 2 adds a sense of creativity whilst keeping the visualisation simple and easy to understand. 
+
+## Figure 3: A Boxplot to demonstrate the distribution of global mortality rates
+
+```{r}
+library(plotly)
+
+plot_ly(filtered_data, 
+        x = ~Entity, 
+        y = ~Mortality_rate, 
+        color = ~Entity, 
+        colors = c("India" = "lightpink",
+                   "China" = "purple",
+                   "United States" = "lightblue"),
+        type = "box") %>%
+  layout(
+    title = "Distribution of Mortality Rates (2000–2021)",
+    yaxis = list(title = "Deaths per 100,000")
+  )
+
+```
+
+
+I also experimented with a boxplot in Figure 3, but I do not think it is as effective as the line graphs, especially if an individual has had no prior experience with visualisations. It could be quite hard to understand, but again it gets the general point across that the US has a higher mortality rate for individuals diagnosed with Alzheimer’s and other dementias. 
+
+## Figure 4: An interactive heatmap of the mortality rate across target countries
+
+```{r}
+p <- ggplot(filtered_data, aes(x = Year, y = Entity, fill = Mortality_rate)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightblue", high = "hotpink") +  # light pink → dark purple
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+    axis.text.y = element_text(size = 10),
+    legend.position = "right"
+  ) +
+  labs(
+    title = "Heatmap of Alzheimer’s Mortality Rate (2000–2021)",
+    x = "Year",
+    y = "Country",
+    fill = "Deaths per 100k"
+  )
+
+ggplotly(p, tooltip = c("x", "y", "fill"))
+```
+
+
+Honestly, Figure 4 was my own curiosity getting the better of me and wanting to make a more aesthetic visualisation. Figure 4 is a heatmap that separates each country into separate rows to demonstrate how each one has had an increase in mortality rates for Alzheimer’s over 21 years. Once again, we can see that the US changed from blue to pink, showing an increase in the mortality rate, whilst India remained in the lower range as demonstrated by the blue. 
+
+```{r}
+library(dplyr)
+
+```
+
+
+# Summary
+Considering at the start of this module I had no previous coding experience, I think this project has allowed me to illustrate just how much I have learnt both in and out of contact hours on the module. I have learnt how to code, first and foremost, but also how to create aesthetically pleasing visualisations that are easy to understand. 
+
+If I had more time, and honestly more patience with R Studio, I would compare the mortality rates across all the countries in the original dataset and attempt to produce some visualisations that demonstrate the differences between each country’s mortality rate. I would also like to delve a bit deeper generically and try to understand why some countries have a higher mortality rate linked to Alzheimer’s than others, perhaps focusing on more neural factors or even just environmental influences in different cultures. 
+
+<div style="text-align: center;">
+  <img src="image1.jpeg" style="width:150px;">
+</div>
+<div style="text-align: center;">
+  (Alzheimer's Society, 2016)
+</div>
+
+# References
+Alzheimer's Association. (2019). Dementia vs. alzheimer’s disease: What is the difference? Alzheimer’s Association. https://www.alz.org/alzheimers-dementia/difference-between-dementia-and-alzheimer-s
+
+Society, A. (2016). Facebook. Facebook.com. https://www.facebook.com/alzheimerssocietyuk/
+
+World Health Organization. (2023). Global Health Estimates. Www.who.int. https://www.who.int/data/global-health-estimates
+
+World Health Organization . (2025). Death rate from Alzheimer’s. Our World in Data. https://archive.ourworldindata.org/20250909-093708/grapher/death-rate-from-alzheimers-other-dementias-ghe.html?tab=table
