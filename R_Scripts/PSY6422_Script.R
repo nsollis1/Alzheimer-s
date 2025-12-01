@@ -1,11 +1,8 @@
 # PSY6422 Mini Project Assessment
 # This project focuses on the worldwide death rate caused by Alzheimer's disease
 
-knitr::include_graphics("~/My_project/Assessment/PSY6422_Assignment/Alzheimer-s/R_Markdowns/image.jpg")
 
-# Research Question: How does Alzheimer's disease mortality rate in the world's 
-# three most populated countries (India, China, United States of America)
-# compare across the 2000–2021 period?
+knitr::include_graphics("~/My_project/Assessment/PSY6422_Assignment/Alzheimer-s/R_Markdowns/image.jpg")
 
 # First you need to install a variety of packages and load them into the console
 library(tidyverse)
@@ -14,6 +11,8 @@ library(ggplot2)
 library(readr)
 library(scatterplot3d)
 library(plotly)
+library(dplyr)
+library(viridis)
 
 # Next you need to import the raw dataset into R and give it a more convenient name
 death_rate <- read_csv("R_Markdowns/Raw_Data/death_rate.csv")
@@ -27,6 +26,7 @@ names(death_rate)
 # Look at the first few rows of raw data
 head(death_rate, 10)
 
+unique(death_rate$Entity) # This will show you all of your countries in the dataset before you filter the data, it's not a necessary check but it is a good one to do to make sure your original dataset has imported correctly.
 
 # Define the countries and the global entity you want to keep
 target_countries <- c("India", "China", "United States", "Global")
@@ -48,9 +48,22 @@ filtered_data <- na.omit(filtered_data)
 
 head(filtered_data)
 summary(filtered_data)
+range(filtered_data$Year)
+
+
+# Custom colour palette for target countries
+country_cols <- c(
+  "India" = "lightpink",
+  "China" = "purple",
+  "United States" = "lightblue"
+)
+
+# These lines define the colour + fill scales but hide their output
+scale_colour_manual(values = country_cols)
+scale_fill_manual(values = country_cols)
 
 ggplot(filtered_data, aes(x = Year, y = Mortality_rate, colour = Entity)) +
-  geom_line(linewidth = 2) +  # Thicker lines
+  geom_line(linewidth = 2) +  # Thicker lines to improve overall appearance
   theme_minimal() +
   labs(
     title = "Alzheimer’s Mortality Rate (2000–2021)",
@@ -64,7 +77,7 @@ ggplot(filtered_data, aes(x = Year, y = Mortality_rate, colour = Entity)) +
     "United States" = "lightblue"
   )) +
   theme(
-    text = element_text(size = 14)  # makes labels easier to read
+    text = element_text(size = 14)  # Makes labels easier to read for a generic audience, and makes it more accessible.
   )
 
 plot_ly(filtered_data, 
@@ -82,7 +95,6 @@ plot_ly(filtered_data,
     yaxis = list(title = "Deaths per 100,000"),
     legend = list(title = list(text='Country'))
   )
-
 plot_ly(filtered_data, 
         x = ~Entity, 
         y = ~Mortality_rate, 
@@ -95,7 +107,6 @@ plot_ly(filtered_data,
     title = "Distribution of Mortality Rates (2000–2021)",
     yaxis = list(title = "Deaths per 100,000")
   )
-
 
 p <- ggplot(filtered_data, aes(x = Year, y = Entity, fill = Mortality_rate)) +
   geom_tile(color = "white") +
@@ -110,12 +121,7 @@ p <- ggplot(filtered_data, aes(x = Year, y = Entity, fill = Mortality_rate)) +
     title = "Heatmap of Alzheimer’s Mortality Rate (2000–2021)",
     x = "Year",
     y = "Country",
-    fill = "Deaths per 100k")
+    fill = "Deaths per 100k"
+  )
 
 ggplotly(p, tooltip = c("x", "y", "fill"))
-
-
-
-
-
-

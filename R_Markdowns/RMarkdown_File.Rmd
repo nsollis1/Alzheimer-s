@@ -14,7 +14,30 @@ css: styles.css
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-# Global Mortality Comparison of Alzheimer's Disease and Other Dementias
+
+<h1 style="
+  text-align:center;
+  font-size:52px;
+  font-weight:700;
+  color:#DA70D6;
+  font-family: 'Georgia', serif;
+  margin-top: 40px;
+  margin-bottom: 10px;
+">
+Alzheimer’s Disease Mortality Analysis
+</h1>
+
+<h3 style="
+  text-align:center;
+  font-size:22px;
+  font-weight:400;
+  color:#DA70D6;
+  font-family: 'Georgia', serif;
+  margin-top:0;
+">
+A Comparative Study of India, China, and the United States
+</h3>
+
 ```{r, echo=FALSE, out.width="48%",fig.align="center"}
 knitr::include_graphics("~/My_project/Assessment/PSY6422_Assignment/Alzheimer-s/R_Markdowns/image.jpg")
 
@@ -24,13 +47,23 @@ knitr::include_graphics("~/My_project/Assessment/PSY6422_Assignment/Alzheimer-s/
 </div>
 
 
+
 # Data Origins
 
 This project focuses on the global mortality rate of Alzheimer’s disease, alongside other forms of dementia. The raw dataset was accessed via Our World in Data (World Health Organization, 2025), derived from the original World Health Organisation’s (WHO) Global Health Estimates (GHE) of 2023 (World Health Organization, 2023).  
 
 WHO’s GHE examines global death and disability statistics, by region, country, sex, age and cause, per 100,000 people. This dataset focuses on the trends of the mortality rate of Alzheimer’s disease from **2000 to 2021**, produced from national vital registration data, latest estimates from WHO technical programs, United Nations partners and inter-agency groups, and the Global Burden of Disease.  
 
-**References for the raw dataset:**
+Alzheimer’s disease and other dementias are rapidly growing global public health concerns, driven largely by aging populations and increasing life expectancy. Understanding how mortality rates vary across the globe allows researchers and medical professionals to examine where the burden is rising most sharply, assess the effectiveness of healthcare systems, and allocate resources more effectively. 
+
+By comparing long-term trends in the world’s most populous countries: **India, China and the United States**, this analysis provides insight into how demographic transitions, healthcare infrastructure, and diagnostic practices may contribute to the global impact of dementia-related mortality. 
+
+Such comparisons are essential for guiding prevention strategies and preparing for the future demands of an aging world.
+
+# The Research Question
+**How does Alzheimer's disease mortality rate in the world's three most populated countries (India, China, United States of America) compare across the 2000–2021 period?**
+
+## References for the raw dataset:
 
 World Health Organization. (2023). Global Health Estimates. Www.who.int. https://www.who.int/data/global-health-estimates  
 
@@ -76,14 +109,17 @@ names(death_rate)
 ```{r}
 head(death_rate, 10)
 ```
-# The Research Question
-How does Alzheimer's disease mortality rate in the world's three most populated countries (India, China, United States of America) compare across the 2000–2021 period? 
 
 # Data Preparation
-For this project, I decided to only analyse the responses from the three most populated countries in the world. To reflect this in the clean data, I removed most of the countries as variables and only focused on India, China and the US. The original dataset consisted of 4422 obs.
+For this project, I decided to only analyse the responses from the three most populated countries in the world. To reflect this in the clean data, I removed most of the countries as variables and only focused on India, China and the US. 
+
+The original dataset consisted of 4422 obs.
 
 ```{r}
+unique(death_rate$Entity) # This will show you all of your countries in the dataset before you filter the data, it's not a necessary check but it is a good one to do to make sure your original dataset has imported correctly.
+
 # Define the countries and the global entity you want to keep, you can just do the 3 countries here but I added Global just in case it would expand on the visualisations- it did not do much so next time I probably wouldn't include it.
+
 target_countries <- c("India", "China", "United States", "Global")
 ```
 ```{r}
@@ -103,6 +139,9 @@ filtered_data <- death_rate %>%
   filter(Entity %in% target_countries) %>%
   filter(Year >= 2000 & Year <= 2021)
 ```
+
+After filtering for the three target countries, some rows contained missing mortality values. These incomplete entries were removed using **na.omit()** to ensure that the dataset was clean and suitable for accurate plotting and statistical interpretation.
+
 ```{r}
 filtered_data <- na.omit(filtered_data) 
 
@@ -111,14 +150,31 @@ filtered_data <- na.omit(filtered_data)
 # Look at the final clean structure
 head(filtered_data)
 summary(filtered_data)
+range(filtered_data$Year)
 ```
 Your new, clean dataset should consist of 66 obs.
 
 # Visualisations
+Before I started to configure the visualisations, I decided to assign each target country a different colour:
+```{r colours, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+# Custom colour palette for target countries
+country_cols <- c(
+  "India" = "lightpink",
+  "China" = "purple",
+  "United States" = "lightblue"
+)
+
+# These lines define the colour + fill scales but hide their output
+scale_colour_manual(values = country_cols)
+scale_fill_manual(values = country_cols)
+
+
+```
+
 ## Figure 1: A Line Graph to demonstrate the trend in Alzheimer's Mortality Rate from 2000-2021
 ```{r}
 ggplot(filtered_data, aes(x = Year, y = Mortality_rate, colour = Entity)) +
-  geom_line(linewidth = 2) +  # Thicker lines
+  geom_line(linewidth = 2) +  # Thicker lines to improve overall appearance
   theme_minimal() +
   labs(
     title = "Alzheimer’s Mortality Rate (2000–2021)",
@@ -132,19 +188,19 @@ ggplot(filtered_data, aes(x = Year, y = Mortality_rate, colour = Entity)) +
     "United States" = "lightblue"
   )) +
   theme(
-    text = element_text(size = 14)  # makes labels easier to read
+    text = element_text(size = 14)  # Makes labels easier to read for a generic audience, and makes it more accessible.
   )
 ```
 
 
 This line graph demonstrates the mortality rate for Alzheimer’s disease, per 100,000 people between the years 2000 and 2021. It is quite simple to comprehend, the higher up the line, the higher the mortality rate. From first glance, the US has a much higher Alzheimer’s-based mortality rate compared to China and India. The choice of using this graph initially is that it is simple, yet effective. 
 
-## Figure 2: A line graph to demonstrate trends over time per country
+## Figure 2: An interactive scatter plot to demonstrate trends over time per country
 
 ```{r}
 library(plotly)
 
-# Interactive line plot with custom colors
+# Interactive line plot with custom colors to match the previous graph, so as to eliminate any misunderstanding
 plot_ly(filtered_data, 
         x = ~Year, 
         y = ~Mortality_rate, 
@@ -166,30 +222,17 @@ plot_ly(filtered_data,
 
 I chose to expand on the original line graph and add some more detailing to it. I was really excited to try making an interactive visualisation, and I think that the interactive line graph in Figure 2 adds a sense of creativity whilst keeping the visualisation simple and easy to understand. 
 
-## Figure 3: A Boxplot to demonstrate the distribution of global mortality rates
+What becomes especially clear through this visualisation is the exponential increase in mortality rates from Alzheimer’s and dementia in the United States compared to the other countries. While all regions show some degree of growth over the 21-year period, the US displays a noticeably steeper upward trend. 
 
-```{r}
-library(plotly)
+The interactivity allows users to hover over specific points and directly observe how the US mortality rate accelerates more quickly and rises to higher levels than its counterparts. This not only reinforces the severity of the issue within the US healthcare and ageing population but also highlights the widening gap between the United States and other nations over time.
 
-plot_ly(filtered_data, 
-        x = ~Entity, 
-        y = ~Mortality_rate, 
-        color = ~Entity, 
-        colors = c("India" = "lightpink",
-                   "China" = "purple",
-                   "United States" = "lightblue"),
-        type = "box") %>%
-  layout(
-    title = "Distribution of Mortality Rates (2000–2021)",
-    yaxis = list(title = "Deaths per 100,000")
-  )
-
-```
+By enabling the viewer to isolate and compare each country’s trajectory, the graph makes the US’s disproportionately high increase impossible to miss, enhancing both the analytical depth and the overall storytelling of the data.
 
 
-I also experimented with a boxplot in Figure 3, but I do not think it is as effective as the line graphs, especially if an individual has had no prior experience with visualisations. It could be quite hard to understand, but again it gets the general point across that the US has a higher mortality rate for individuals diagnosed with Alzheimer’s and other dementias. 
 
-## Figure 4: An interactive heatmap of the mortality rate across target countries
+
+
+## Figure 3: An interactive heatmap of the mortality rate across target countries
 
 ```{r}
 p <- ggplot(filtered_data, aes(x = Year, y = Entity, fill = Mortality_rate)) +
@@ -212,12 +255,7 @@ ggplotly(p, tooltip = c("x", "y", "fill"))
 ```
 
 
-Honestly, Figure 4 was my own curiosity getting the better of me and wanting to make a more aesthetic visualisation. Figure 4 is a heatmap that separates each country into separate rows to demonstrate how each one has had an increase in mortality rates for Alzheimer’s over 21 years. Once again, we can see that the US changed from blue to pink, showing an increase in the mortality rate, whilst India remained in the lower range as demonstrated by the blue. 
-
-```{r}
-library(dplyr)
-
-```
+Honestly, Figure 3 was my own curiosity getting the better of me and wanting to make a more aesthetic visualisation. Figure 4 is a heatmap that separates each country into separate rows to demonstrate how each one has had an increase in mortality rates for Alzheimer’s over 21 years. Once again, we can see that the US changed from blue to pink, showing an increase in the mortality rate, whilst India remained in the lower range as demonstrated by the blue. 
 
 
 # Summary

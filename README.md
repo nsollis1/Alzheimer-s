@@ -1,10 +1,45 @@
 # Alzheimer-s
-PSY6422 Mini Project Assignment
+## PSY6422 Mini Project Assignment
 
+## Overview
 This project focuses on the global mortality rate of Alzheimer’s disease, alongside other forms of dementia. The raw dataset was accessed via Our World in Data (World Health Organization, 2025), derived from the original World Health Organisation’s (WHO) Global Health Estimates (GHE) of 2023 (World Health Organization, 2023).  
 
-How does Alzheimer's disease mortality rate in the world's three most populated countries (India, China, United States of America) compare to the global average across the 2000–2021 period? 
+## Research Question
+How does Alzheimer's disease mortality rate in the world's three most populated countries (India, China, United States of America) compare across the 2000–2021 period? 
 
-# Files
+# Project Files
 [R Markdown File](R_Markdowns/RMarkdown_File.Rmd)
 
+[R Scripts](R_Scripts/PSY6422_Script.R)
+
+[Datasets](Datasets/Datasets.RData)
+
+[Design and Formatting](styles.css)
+
+[Read Me File](README.md)
+
+[Full Project History](.Rhistory)
+
+[Data for Git to ignore](.gitignore)
+
+# How to run this project
+For this project, you will need the following:
+- R and R Studio
+- R Markdown
+- Github
+- Libraries/ packages
+    - library(tidyverse)
+    - library(here)
+    - library(ggplot2)
+    - library(readr)
+    - library(scatterplot3d)
+    - library(plotly)
+    - library(dplyr)
+    - library(viridis)
+    
+# Data Sourcing
+World Health Organization. (2023). Global Health Estimates. Www.who.int. https://www.who.int/data/global-health-estimates  
+
+World Health Organization . (2025). Death rate from Alzheimer’s. Our World in Data. 
+
+https://archive.ourworldindata.org/20250909093708/grapher/deathratefromalzheimersotherdementias-ghe.html?tab=table  
